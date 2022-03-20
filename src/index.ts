@@ -62,23 +62,18 @@ async function getData() {
     return formatted;
   } catch (errors) {
     console.error(errors);
+    return null;
   }
 }
 
-async function main() {
-  const html = await getData();
-  const { busNo, nextBusTime, nextBusTime2, onSchedule, busArrivalTime } = parseHTML(html);
-  return { busNo, nextBusTime, nextBusTime2, onSchedule, busArrivalTime };
-}
-
-
-
 app.get('/', async (req, res) => {
-  const { busNo, nextBusTime, nextBusTime2, onSchedule, busArrivalTime } = await main();
-
-  res.json({ busNo, nextBusTime, nextBusTime2, onSchedule, busArrivalTime });
+  const html = await getData();
+  if (!html) {
+    res.send(503);
+  }
+  res.json(parseHTML(html));
 });
-
-app.listen(5000, () => {
-  console.log(`Server listening on port ${5000}`);
+const port = 3000;
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
 });
