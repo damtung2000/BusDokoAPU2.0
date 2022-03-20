@@ -58,7 +58,8 @@ const AxiosInstance = axios.create();
 async function getData() {
   try {
     const html = await AxiosInstance.get(url);
-    const formatted = html.data.replaceAll('\\r\\n', '\n').replaceAll('\\', '');
+    const { data } = html;
+    const formatted = data.replaceAll('\\r\\n', '\n').replaceAll('\\', '');
     return formatted;
   } catch (errors) {
     console.error(errors);
@@ -69,7 +70,8 @@ async function getData() {
 app.get('/', async (req, res) => {
   const html = await getData();
   if (!html) {
-    res.send(503);
+    res.sendStatus(503);
+    return;
   }
   res.json(parseHTML(html));
 });
