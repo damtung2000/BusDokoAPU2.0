@@ -59,7 +59,8 @@ async function getData() {
   try {
     const html = await AxiosInstance.get(url);
     const { data } = html;
-    const formatted = data.replaceAll('\\r\\n', '\n').replaceAll('\\', '');
+    console.log(data);
+    const formatted = (data || '').toString().replace(/\\r\\n/g, '\n').replace(/\\/g, '');
     return formatted;
   } catch (errors) {
     console.error(errors);
