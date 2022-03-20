@@ -34,6 +34,7 @@ module.exports = {
     ],
     '@typescript-eslint/no-var-requires': 1,
     '@typescript-eslint/no-use-before-define': 1,
+    '@typescript-eslint/no-unused-vars': 'warn',
     'no-shadow': ['error', {
       builtinGlobals: false, hoist: 'functions', allow: [], ignoreOnInitialization: false,
     }],
