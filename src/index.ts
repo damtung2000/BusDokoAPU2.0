@@ -4,23 +4,79 @@ import cheerio from 'cheerio';
 
 const app = express();
 const url = 'https://www.busdoko-oita.jp/map/SpecialRoute/RouteResult?selectLang=en&spId=1&drId=2&stSid=1de41777-3f62-49cf-959a-c73ccd0223db&_=1647759206863';
-// const url = 'https://www.premierleague.com/stats/top/players/goals?se=-1&cl=-1&iso=-1&po=-1?se=-1';
+
+function getNextBusSchedule(busSchedule: string[]): { nextBusTime: string, nextBusTime2: string } {
+  const currentTime = new Date();
+  const currentHour = currentTime.getHours();
+  const currentMinute = currentTime.getMinutes();
+  let nextBusTime = '';
+  let nextBusTime2 = '';
+  for (const time of busSchedule) {
+    const [hour, minute] = (time || '').split(':');
+    if (parseInt(hour) >= currentHour && parseInt(minute) >= (currentMinute + 5)) {
+      if (!!nextBusTime && !!nextBusTime2) break;
+      if (!nextBusTime) {
+        nextBusTime = time;
+      }
+      nextBusTime2 = time;
+    }
+  }
+  return { nextBusTime, nextBusTime2 };
+}
+
+const parseHTML = (html: string) => {
+  const $ = cheerio.load(html);
+  const busSchedule: string[] = [];
+
+  const arrivalTimes = $('.arrivalTime');
+  arrivalTimes.each((i, el) => {
+    busSchedule.push(
+      $(el)
+        .text()
+        .trim(),
+    );
+  });
+
+  const { nextBusTime, nextBusTime2 } = getNextBusSchedule(busSchedule);
+  console.log('busSchedule: ', busSchedule);
+  console.log(nextBusTime);
+  const onSchedule = !!$('.busStateOnSchedule').text();
+  const busArrival = $('.busArrival:has(span)').text();
+  const busArrivalTime = (busArrival.match(/\d+/) || [])[0];
+  return {
+    busNo: 50,
+    nextBusTime: nextBusTime,
+    nextBusTime2: nextBusTime2,
+    onSchedule: onSchedule,
+    busArrivalTime: busArrivalTime,
+  };
+
+
+};
+
 const AxiosInstance = axios.create();
-AxiosInstance.get(url)
-  .then(
-    (response) => {
-      const html = response.data;
-      const formatted = html.replaceAll('\\r\\n', '\n').replaceAll('\\', '');
-      // console.log(formatted);
-      const $ = cheerio.load(formatted);
-      const busState = $('.busArrival:has(span)').text();
-      // const text = $.text();
-      console.log(busState);
-    },
-  )
-  .catch(console.error);
-app.get('/', (req, res) => {
-  res.send('Success');
+async function getData() {
+  try {
+    const html = await AxiosInstance.get(url);
+    const formatted = html.data.replaceAll('\\r\\n', '\n').replaceAll('\\', '');
+    return formatted;
+  } catch (errors) {
+    console.error(errors);
+  }
+}
+
+async function main() {
+  const html = await getData();
+  const { busNo, nextBusTime, nextBusTime2, onSchedule, busArrivalTime } = parseHTML(html);
+  return { busNo, nextBusTime, nextBusTime2, onSchedule, busArrivalTime };
+}
+
+
+
+app.get('/', async (req, res) => {
+  const { busNo, nextBusTime, nextBusTime2, onSchedule, busArrivalTime } = await main();
+
+  res.json({ busNo, nextBusTime, nextBusTime2, onSchedule, busArrivalTime });
 });
 
 app.listen(5000, () => {
