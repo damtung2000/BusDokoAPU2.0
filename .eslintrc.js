@@ -11,7 +11,6 @@ module.exports = {
     node: true,
   },
   extends: [
-    'airbnb-base',
     'eslint:recommended',
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
@@ -35,5 +34,8 @@ module.exports = {
     ],
     '@typescript-eslint/no-var-requires': 1,
     '@typescript-eslint/no-use-before-define': 1,
+    'no-shadow': ['error', {
+      builtinGlobals: false, hoist: 'functions', allow: [], ignoreOnInitialization: false,
+    }],
   },
 };
