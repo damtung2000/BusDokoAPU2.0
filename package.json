@@ -5,9 +5,9 @@
   "main": "index.js",
   "repository": "https://github.com/damtung2000/BusDokoAPU2.0.git",
   "author": "Tung Dam <damtung2000@gmail.com>",
-  "license": "GPLv3",
+  "license": "GPL-3.0-or-later",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p .",
     "start": "tsc && node dist/index.js",
     "dev": "eslint --fix --ext .ts ./src && nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
     "lint": "eslint --fix --ext .ts ./src"
